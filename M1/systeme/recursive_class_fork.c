@@ -4,7 +4,8 @@
 #include <sys/wait.h>
 #include <string.h>
 
-char E[]="(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+char E[100];
+//"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 //"((A+B)*(C-(D/E)))";
 
 char* substr(const char *src, int m, int n)
@@ -18,7 +19,7 @@ char* substr(const char *src, int m, int n)
 }
 
 void lire_exp(){
-    printf("Ecrire l'expression\n");
+    printf("Ecrire l'expression : ");
     scanf("%s",E);
 }
 
@@ -70,7 +71,8 @@ void genere(char *E,int noeud,int pere){
 
     int ge=0;
     int de=0;
-
+    
+    int id;
     int opc = chercher_opc(E);
     //printf("%d\n",opc);
     int nopg = nb_op(E);
@@ -82,15 +84,29 @@ void genere(char *E,int noeud,int pere){
 
     if (E[opc-1]==')') ge=1;
     if (E[opc+1]=='(') de=1;
-    //printf("%s\n",substr(E,1,opc));
-    //printf("%s\n",substr(E,opc+1,strlen(E)-1));
-    if (ge) {genere(substr(E,1,opc),noeud+1,noeud);}
-    if (de) {genere(substr(E,opc+1,strlen(E)-1),noeud+nopg+1,noeud);}
+
+    
+    id = fork();
+    if (id !=0){ 
+        if (ge) {
+            printf("        1ID = %d\n",id);
+            genere(substr(E,1,opc),noeud+1,noeud); 
+            }
+    }
+
+
+    if (id ==0){   
+        if (de) {
+          
+            printf("        2ID = %d\n",id);
+            genere(substr(E,opc+1,strlen(E)-1),noeud+nopg+1,noeud);
+            }
+        }
  
 }
 
 void main(){
-    //lire_exp();
+    lire_exp();
     genere(E,1,0);
 
 }

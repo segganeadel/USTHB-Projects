@@ -58,8 +58,8 @@ void genere(char *s,int start,int end,int i,int j){
 
 int main(){
 
-    char s[]="((A+B)*(C-(D/E)))";
-    char s1[]="(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+    char s1[]="((A+B)*(C-(D/E)))";
+    char s[]="(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
     int start = 0;
     int end = strlen(s)-1;
     

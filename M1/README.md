@@ -1,0 +1,1 @@
+This folder contains projects done in my 1st year Masters as a Computer vision student

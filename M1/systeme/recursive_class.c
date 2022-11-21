@@ -5,8 +5,9 @@
 #include <string.h>
 
 char E[100];
-//"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 //"((A+B)*(C-(D/E)))";
+//"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+
 
 char* substr(const char *src, int m, int n)
 {
@@ -87,7 +88,8 @@ void genere(char *E,int noeud,int pere){
 
     if (ge) {genere(substr(E,1,opc),noeud+1,noeud);}
     if (de) {genere(substr(E,opc+1,strlen(E)-1),noeud+nopg+1,noeud);}
- 
+    
+    //while(wait(NULL) > 0);
 }
 
 void main(){
@@ -98,3 +100,6 @@ void main(){
 }
 
 //((A+B)*(C-(D/E)))
+
+//"((A+B)*(C-(D/E)))";
+//"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";

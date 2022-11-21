@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <sys/types.h>
+#include <signal.h>
 
 char E[100];
 //"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
@@ -73,10 +75,15 @@ void genere(char *E,int noeud,int pere){
     int de=0;
     
     int id;
+    int id2;
+
     int opc = chercher_opc(E);
     //printf("%d\n",opc);
     int nopg = nb_op(E);
     //printf("%d\n",nopg);
+
+    int pid=getpid();
+    printf("\nPID : %d\n",pid);
 
     generer_noeud(noeud); 
     generer_tache(E, noeud, opc, nopg); 
@@ -86,23 +93,22 @@ void genere(char *E,int noeud,int pere){
     if (E[opc+1]=='(') de=1;
 
     
-    id = fork();
-    if (id !=0){ 
-        if (ge) {
-            printf("        1ID = %d\n",id);
-            genere(substr(E,1,opc),noeud+1,noeud); 
-            }
+    
+    if (ge) {
+        id = fork();
+        if (id ==0){ 
+            genere(substr(E,1,opc),noeud+1,noeud);}
     }
 
-
-    if (id ==0){   
-        if (de) {
-          
-            printf("        2ID = %d\n",id);
-            genere(substr(E,opc+1,strlen(E)-1),noeud+nopg+1,noeud);
-            }
-        }
- 
+    
+    if (de) {
+        id2 = fork();
+        if (id2 ==0){genere(substr(E,opc+1,strlen(E)-1),noeud+nopg+1,noeud);}}
+    
+    wait(0);
+    wait(0);
+    exit(0);
+    
 }
 
 void main(){
@@ -112,3 +118,5 @@ void main(){
 }
 
 //((A+B)*(C-(D/E)))
+//"((A+B)*(C-(D/E)))";
+//"(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";

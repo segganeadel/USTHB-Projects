@@ -8,6 +8,7 @@ depth = 80  # distance y between each node
 RAYON = 30  # Node Radius
 interval = (0, 30)  # Node value Random interval
 
+GRAY = (128, 128, 128)
 
 # ----------------Texts and colors----------------
 pygame.font.init()

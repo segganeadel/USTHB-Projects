@@ -52,18 +52,18 @@ class Node:
         self.displayValue(surface)
         pygame.display.flip()
 
-    def chosen(self,surface):
-        x, y = self.position
-        gfxdraw.filled_circle(surface, x, y, RAYON, SUCCESS_COLOR)
-        self.displayValue(surface)
-        pygame.display.flip()
-
     def visited_link(self,surface, parent):
         x1, y1 = self.position
         x2, y2 = parent.position
         draw.line(surface,EXPLORED_COLOR, (x1,y1), (x2,y2), 5 )
         self.visited(surface)
-        parent.visited(surface)
+        #parent.visited(surface)
+        pygame.display.flip()
+
+    def chosen(self,surface):
+        x, y = self.position
+        gfxdraw.filled_circle(surface, x, y, RAYON, SUCCESS_COLOR)
+        self.displayValue(surface)
         pygame.display.flip()
 
     def route(self,surface, parent):
@@ -86,23 +86,19 @@ class Node:
 
     @staticmethod
     def displayAlphaBeta(surface, noeud):
-        CURRENT_COLOR = SUCCESS_COLOR if noeud.alpha != float(
-            '-inf') else GRAY_COLOR
-        CURRENT_COLOR_B = SUCCESS_COLOR_B if noeud.beta != float(
-            'inf') else GRAY_COLOR
 
         x, y = noeud.position
-        text = f"A : {noeud.alpha}"
-        text_font = pygame.font.SysFont("Comic Sans MS", 15)
-        text_render = text_font.render(text, False, CURRENT_COLOR)
-        surface.blit(text_render, (x-20, y-RAYON-40))
 
+        text = f"A : {noeud.alpha}"
+        text_font = pygame.font.SysFont("Arial", 18)
+        text_render = text_font.render(text, False, (255,255,255))
+        surface.blit(text_render, (x-20, y-RAYON-40))
+        
         text = f"B : {noeud.beta}"
-        text_font = pygame.font.SysFont("Comic Sans MS", 15)
-        text_render = text_font.render(text, False, CURRENT_COLOR_B)
+        text_font = pygame.font.SysFont("Arial", 18)
+        text_render = text_font.render(text, False, (255,255,255))
         surface.blit(text_render, (x-20, y-RAYON-25))
 
-        time.sleep(SPEED)
         pygame.display.flip()
 
 

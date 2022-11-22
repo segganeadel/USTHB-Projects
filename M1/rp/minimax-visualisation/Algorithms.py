@@ -56,8 +56,9 @@ def MiniMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
         node.path = bestPath
         # Display the best path and the current node’s value
         
-        node.path.route(surface,node)
-        node.displayValue(surface)
+        node.route(surface,node.path)
+        #node.displayValue(surface)
+
         return bestValue
 
 
@@ -65,7 +66,8 @@ def NegaMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit() 
+            sys.exit()
+
     time.sleep(0.7)
     MAX = 1
     MIN = -1
@@ -86,12 +88,13 @@ def NegaMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
             child.visited_link(surface,node)
             NegaMax (child, -player, depth-1,surface) # Apply the NegaMax function on each child
             child.value = -child.value
+            child.visited(surface)
             if child.value > bestValue:
                 bestValue = child.value
                 bestPath = child
         node.value = bestValue
         node.path = bestPath
-        node.path.route(surface,node)
+        node.route(surface,node.path)
         #node.displayValue(surface)
     # Display the best path and the current node’s value
 
@@ -128,21 +131,26 @@ def NegaMaxAlphaBetaPruning(node:Node, player:int, depth:int, alpha:int, beta:in
         for child in listChildren:
             # Mark the link between the current node and the child node as explored
             child.visited_link(surface,node)
+
             NegaMaxAlphaBetaPruning(child, -player, depth-1, -beta, -alpha,surface)
             child.value = -child.value
+
+            child.visited(surface)
+
             if child.value > bestValue:
                 bestValue = child.value
                 bestPath = child
             if bestValue > alpha:
                 alpha = bestValue
                 # Display the new value of alpha
+                Node.displayAlphaBeta(surface,node)
             if beta <= alpha:
                 break
         node.value = bestValue
         node.path = bestPath
         # Display the best path and the current node’s value
-        node.path.route(surface,node)
-        node.displayValue(surface)
+        node.route(surface,node.path)
+        #node.displayValue(surface)
 
 
 def valueToNode(values:list,surface,SIZE,player):

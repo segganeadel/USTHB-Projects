@@ -33,6 +33,7 @@ int main()
 	
     long int n = 5*pow(10,4);
     int arr[n+1];
+
     for (size_t i = 0; i < n; i++)
     {
         arr[i] = rand();
@@ -40,17 +41,17 @@ int main()
     
     time_t begin = time(NULL);
 
-    //triInsertion(arr,n);
-    triBulle(arr, n);
+    triInsertion(arr,n);
+    //triBulle(arr, n);
     //triRapide(arr,0,n-1);
     //triFusion(arr,0,n-1);
     //triTas(arr, n-1);
 
     time_t end = time(NULL);
 
-    printf("The elapsed time is %ld seconds\n", (end - begin));
+    printArray(arr, n);
 
-    //printArray(arr, n);
+    printf("\nThe elapsed time is %ld seconds\n", (end - begin));
 
     return 0;
 }

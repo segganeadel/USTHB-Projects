@@ -1,8 +1,7 @@
 from math import inf
 import pygame
 from pygame import gfxdraw,draw
-import time
-from Proprities import RAYON,SPEED,EXPLORED_COLOR,SUCCESS_COLOR,COLOR,textFont,MainFont,titleFont
+from Proprities import RADIUS,EXPLORED,RED,COLOR,GRAY,WHITE,textFont,alphaFont
 
 
 class Node:
@@ -17,16 +16,7 @@ class Node:
 
     def draw_noeud(self,surface):
         x, y = self.position
-        gfxdraw.filled_circle(surface, x, y, RAYON, COLOR)
-
-        """
-        if self.value is not None:
-            text = f"{self.value}"
-            text_surface = textFont.render(text, True, (255, 255, 255))
-            text_rect = text_surface.get_rect()
-            text_rect.center = (x, y)
-            surface.blit(text_surface, text_rect)
-        """
+        gfxdraw.filled_circle(surface, x, y, RADIUS, COLOR)
 
     def draw_link(self,surface,parent):
         x1, y1 = self.position
@@ -35,70 +25,88 @@ class Node:
 
     def draw_initial(self,surface,stepV):
         x, y = self.position
-        x, y = x , y+(stepV//1.7)
+        x, y = x , y+(stepV)
         rect = pygame.Rect((x,y) , (50,50))
         rect.center = (x , y)
         gfxdraw.box(surface, rect, COLOR)
         if self.value is not None:
             text = f"{self.value}"
-            text_surface = textFont.render(text, True, (255, 255, 255))
+            text_surface = textFont.render(text, True, WHITE)
             text_rect = text_surface.get_rect()
             text_rect.center = (x , y)
             surface.blit(text_surface, text_rect)
 
     def visited(self,surface):
         x, y = self.position
-        gfxdraw.filled_circle(surface, x, y, RAYON, EXPLORED_COLOR)
+        gfxdraw.filled_circle(surface, x, y, RADIUS, EXPLORED)
         self.displayValue(surface)
         pygame.display.flip()
 
     def visited_link(self,surface, parent):
         x1, y1 = self.position
         x2, y2 = parent.position
-        draw.line(surface,EXPLORED_COLOR, (x1,y1), (x2,y2), 5 )
-        self.visited(surface)
-        #parent.visited(surface)
+        draw.line(surface,EXPLORED, (x1,y1), (x2,y2), 5 )
         pygame.display.flip()
 
     def chosen(self,surface):
         x, y = self.position
-        gfxdraw.filled_circle(surface, x, y, RAYON, SUCCESS_COLOR)
-        self.displayValue(surface)
+        gfxdraw.filled_circle(surface, x, y, RADIUS, RED)
         pygame.display.flip()
 
-    def route(self,surface, parent):
+    def route(self,surface,child,negamax=False):
         x1, y1 = self.position
-        x2, y2 = parent.position
-        draw.line(surface,SUCCESS_COLOR, (x1,y1), (x2,y2), 5 )
-        self.chosen(surface)
-        parent.chosen(surface)
+        x2, y2 = child.position
+        draw.line(surface,RED, (x1,y1), (x2,y2), 5 )
+        self.visited(surface)
+        child.chosen(surface)
+        child.displayValue(surface,negamax)
         pygame.display.flip()
 
 
-    def displayValue(self,surface):  
+    def displayValue(self,surface,negamax=False):  
         if self.value is not None:
-            text = f"{self.value}"
-            text_surface = textFont.render(text, False, (255, 255, 255))        
+            value = self.value
+            if negamax:
+                value = -value
+            text = f"{value}"
+            text_surface = textFont.render(text, False, WHITE)        
             text_rect = text_surface.get_rect()
             text_rect.center = (self.position[0], self.position[1])
             surface.blit(text_surface, text_rect)
             pygame.display.flip()
 
     @staticmethod
-    def displayAlphaBeta(surface, noeud):
+    def displayAlphaBeta(surface,node,alpha,beta):
+        x, y = node.position
 
-        x, y = noeud.position
-
-        text = f"A : {noeud.alpha}"
-        text_font = pygame.font.SysFont("Arial", 18)
-        text_render = text_font.render(text, False, (255,255,255))
-        surface.blit(text_render, (x-20, y-RAYON-40))
+        text = f" α : {alpha} "
+        text_render = alphaFont.render(text, True, WHITE, GRAY)
+        rect = text_render.get_rect()
+        rect.center = (x, y-RADIUS-35)
+        surface.blit(text_render, rect)
         
-        text = f"B : {noeud.beta}"
-        text_font = pygame.font.SysFont("Arial", 18)
-        text_render = text_font.render(text, False, (255,255,255))
-        surface.blit(text_render, (x-20, y-RAYON-25))
+        text = f" β : {beta} "
+        text_render = alphaFont.render(text, True, WHITE, GRAY)
+        rect = text_render.get_rect()
+        rect.center = (x, y-RADIUS-20)
+        surface.blit(text_render, rect)
 
         pygame.display.flip()
 
+    def displayAlphaBetaLast(surface,node,alpha,beta):
+        x, y = node.position
+
+        text = f" α : {alpha} "
+        text_render = alphaFont.render(text, True, WHITE, GRAY)
+        rect = text_render.get_rect()
+        rect.center = (x, y+RADIUS+20)
+        surface.blit(text_render, rect)
+        
+        text = f" β : {beta} "
+        text_render = alphaFont.render(text, True, WHITE, GRAY)
+        rect = text_render.get_rect()
+        rect.center = (x, y+RADIUS+35)
+        surface.blit(text_render, rect)
+
+        pygame.display.flip()
 

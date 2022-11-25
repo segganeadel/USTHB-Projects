@@ -1,27 +1,23 @@
 from math import inf,log2,floor
 from Node import Node
 import pygame
-from Proprities import RAYON,SPEED,EXPLORED_COLOR,SUCCESS_COLOR,COLOR,textFont,MainFont,titleFont
+from Proprities import SPEED,SIZE,WHITE,textFont
 import sys
 import time
 
+MAX = 1
+MIN = -1
 
 
 def MiniMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()    
-    time.sleep(0.7)
-
-    MAX = 1
-    MIN = -1
-
+    checkEvent()
+    time.sleep(SPEED)
 
     if depth == 1:
         # Display the current node’s value and mark it as explored
-        node.displayValue(surface)
+        node.visited(surface)
+        #node.displayValue(surface)
     else:
         # Mark the current node as explored
         node.visited(surface)
@@ -55,22 +51,15 @@ def MiniMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
         node.value = bestValue
         node.path = bestPath
         # Display the best path and the current node’s value
-        
         node.route(surface,node.path)
-        #node.displayValue(surface)
 
         return bestValue
 
 
 def NegaMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    time.sleep(0.7)
-    MAX = 1
-    MIN = -1
+    
+    checkEvent()
+    time.sleep(SPEED)
 
     if depth == 1:
         if player == MIN:
@@ -88,38 +77,32 @@ def NegaMax(node:Node, player:int, depth:int,surface): # Initial depth is 5
             child.visited_link(surface,node)
             NegaMax (child, -player, depth-1,surface) # Apply the NegaMax function on each child
             child.value = -child.value
-            child.visited(surface)
             if child.value > bestValue:
                 bestValue = child.value
                 bestPath = child
         node.value = bestValue
         node.path = bestPath
-        node.route(surface,node.path)
-        #node.displayValue(surface)
-    # Display the best path and the current node’s value
+        # Display the best path and the current node’s value
+        node.route(surface,node.path,True)
+        
 
 def NegaMaxAlphaBetaPruning(node:Node, player:int, depth:int, alpha:int, beta:int,surface):
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit() 
-    time.sleep(0.7)
-    MAX = 1
-    MIN = -1
+    checkEvent()
+    time.sleep(SPEED)
 
     node.alpha = alpha
     node.beta = beta
 
-    node
     # Initially, depth=5, alpha=-inf and beta=+inf
     if depth == 1:
+
         if player == MIN:
             node.value = -node.value
         # Display the current node’s value and mark it as explored
-        node.displayValue(surface)
+        node.visited(surface)
         # Display the values of alpha and beta
-
+        Node.displayAlphaBetaLast(surface,node,alpha,beta)
     else:
         # Mark the current node as explored
         node.visited(surface)
@@ -134,40 +117,50 @@ def NegaMaxAlphaBetaPruning(node:Node, player:int, depth:int, alpha:int, beta:in
 
             NegaMaxAlphaBetaPruning(child, -player, depth-1, -beta, -alpha,surface)
             child.value = -child.value
-
-            child.visited(surface)
-
             if child.value > bestValue:
                 bestValue = child.value
                 bestPath = child
             if bestValue > alpha:
                 alpha = bestValue
                 # Display the new value of alpha
-                Node.displayAlphaBeta(surface,node)
+                Node.displayAlphaBeta(surface,node,alpha,beta)
             if beta <= alpha:
                 break
         node.value = bestValue
         node.path = bestPath
         # Display the best path and the current node’s value
-        node.route(surface,node.path)
-        #node.displayValue(surface)
+        node.route(surface,node.path,True)
 
 
-def valueToNode(values:list,surface,SIZE,player):
+def checkEvent():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+def waitForExit():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if pygame.mouse.get_pressed()[0]:
+                x, y = pygame.mouse.get_pos()
+            
+
+def valueToNode(values:list,surface,SIZE):
 
     stepH = SIZE[0]//(len(values)+2)
     depth = floor(log2(len(values)+1))
-    stepV = SIZE[1]//(depth+2)
+    stepV = SIZE[1]//(depth+3)
 
     x=2*stepH
-    y=SIZE[1]-stepV
+    y=SIZE[1]-2*stepV
 
     nodes=[]
     for value in values:
         node=Node(value=value,x=x,y=y)
         node.draw_initial(surface,stepV)
-        if player == -1:
-            node.value=-value
         nodes.append(node)
         x+=stepH
         pygame.display.flip()
@@ -185,7 +178,7 @@ def buildTree(nodes:list,surface,stepV:int,stepH:int,player):
             text = "MIN"
         else:
             text = "MAX"
-        text_surface = textFont.render(text, True, (255, 255, 255))
+        text_surface = textFont.render(text, True, WHITE)
         text_rect = text_surface.get_rect()
         text_rect.center = (stepH, nodes[0].position[1])
         surface.blit(text_surface, text_rect)
@@ -202,26 +195,24 @@ def buildTree(nodes:list,surface,stepV:int,stepH:int,player):
             rightChild.draw_link(surface,parent)
             leftChild.draw_noeud(surface)
             rightChild.draw_noeud(surface)
-
-
-
         root = buildTree(newNodes,surface,stepV,stepH,-player)
-
-
-
-
         return root
-
     if player == -1:
         text = "MIN"
     else:
         text = "MAX"
-    text_surface = textFont.render(text, True, (255, 255, 255))
+    text_surface = textFont.render(text, True, WHITE)
     text_rect = text_surface.get_rect()
     text_rect.center = (stepH, nodes[0].position[1])
     surface.blit(text_surface, text_rect)
 
     nodes[0].draw_noeud(surface)
     pygame.display.flip()
-    return nodes
+    return nodes[0]
+
+
+def init(player,intialValues:list,surface) :
+    intialNodes,stepH,stepV,depth = valueToNode(intialValues,surface,SIZE)
+    root = buildTree(intialNodes,surface,stepV,stepH,player)
+    return root,depth
 

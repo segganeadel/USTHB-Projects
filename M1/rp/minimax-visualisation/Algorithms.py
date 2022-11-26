@@ -1,9 +1,10 @@
 from math import inf,log2,floor
 from Node import Node
 import pygame
-from Proprities import SPEED,SIZE,WHITE,textFont
+from Proprities import SPEED,SIZE,WHITE,RED,textFont
 import sys
 import time
+from Button import Button
 
 MAX = 1
 MIN = -1
@@ -133,19 +134,11 @@ def NegaMaxAlphaBetaPruning(node:Node, player:int, depth:int, alpha:int, beta:in
 
 
 def checkEvent():
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
-def waitForExit():
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if pygame.mouse.get_pressed()[0]:
-                x, y = pygame.mouse.get_pos()
             
 
 def valueToNode(values:list,surface,SIZE):
@@ -216,3 +209,19 @@ def init(player,intialValues:list,surface) :
     root = buildTree(intialNodes,surface,stepV,stepH,player)
     return root,depth
 
+def keepLoop(surface):
+    button0 = button0 = Button((1200,100),"Return",surface)
+    button0.draw(surface,RED)
+    pygame.display.flip()
+    loop = True
+    clock = pygame.time.Clock()
+    while loop:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if pygame.mouse.get_pressed()[0]:
+                x, y = pygame.mouse.get_pos()
+                if button0.box_rect.collidepoint(x, y):
+                    loop = False
+        clock.tick(60)

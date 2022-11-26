@@ -60,19 +60,19 @@ while True:
                 surface.fill(GRAY)
                 root,depth = Algorithms.init(player,intialValues,surface)
                 Algorithms.MiniMax(root,player,depth,surface)
-                #keepLoop()
+                Algorithms.keepLoop(surface)
             
             if button2.box_rect.collidepoint(x, y):
                 surface.fill(GRAY)
                 root,depth = Algorithms.init(player,intialValues,surface)
                 Algorithms.NegaMax(root,player,depth,surface)
-                #keepLoop()
+                Algorithms.keepLoop(surface)
 
             if button3.box_rect.collidepoint(x, y):
                 surface.fill(GRAY)
                 root,depth = Algorithms.init(player,intialValues,surface)
                 Algorithms.NegaMaxAlphaBetaPruning(root,player,depth,alpha,beta,surface)
-                #keepLoop()
+                Algorithms.keepLoop(surface)
 
     surface.fill(GRAY)
     button0.draw(surface,BLACK)

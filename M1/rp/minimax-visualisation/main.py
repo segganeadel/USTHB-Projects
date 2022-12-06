@@ -54,8 +54,6 @@ while True:
                     button0 = Button((300,200),"Switch player : MAX",surface)
                 else :
                     button0 = Button((300,200),"Switch player : MIN",surface)
-                #switch player
-                pass
             if button1.box_rect.collidepoint(x, y):
                 surface.fill(GRAY)
                 root,depth = Algorithms.init(player,intialValues,surface)

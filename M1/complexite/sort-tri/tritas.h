@@ -29,4 +29,39 @@ void triTas(int tab[], int n)
     }
 }
 
+tamiser2(int *tab){
+
+    int len = sizeof(tab)/sizeof(tab[0]);
+    int k,j,tmp;
+
+    for (int i = 0; i < len/2 ; i++)
+    {
+        k = 2*i;
+        if(tab[2*i+1] > tab [i])
+        {
+            j = k+1;
+            while (j>0 && tab[j] > tab(j-1)/2)
+            {
+                tmp = tab[j];
+                tab[j] = tab[(j-1)/2];
+                tab[(j-1)/2] = tmp;
+                j=(j-1)/2;
+            }
+            
+        }
+        if((k+2) < len && tab[2*i+2] > tab [i]){
+            j=k+2;
+            while (j>0 && tab[j] > tab[(j-1)/2])
+            {
+                tmp = tab[j];
+                tab[j] = tab[(j-1)/2];
+                tab[(j-1)/2] = tmp;
+                j=(j-1)/2;
+            }
+            
+        }
+    }
+    
+}
+
 

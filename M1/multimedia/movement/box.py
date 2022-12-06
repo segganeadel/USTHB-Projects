@@ -34,6 +34,7 @@ grayImg1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 # Cropping an image
 bloc1 = grayImg1[box_coordinates[0][1]:box_coordinates[1][1], box_coordinates[0][0]:box_coordinates[1][0]] 
 print(bloc1)
+
 # Display cropped image
 cv2.imshow("cropped", bloc1)
 cv2.waitKey(0)

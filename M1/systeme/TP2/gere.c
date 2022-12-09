@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/msg.h>
+#include <sys/shm.h>
 #include <semaphore.h>
 
 const int Nbfiliere = 3;
@@ -55,9 +56,10 @@ struct reponse
 void creer_structure()
 {
     // file message boite au lettres
-    key_t key = ftok("progfile", 65);
-    msgid = msgget(key, 0666 | IPC_CREAT);
-
+    key_t msgkey = ftok("progfile", 65);
+    msgid = msgget(msgkey, 0666 | IPC_CREAT);
+    key_t shmkey = ftok("progfile", 65);
+    shmid = shmget (shmkey, sizeof (int), 0644 | IPC_CREAT);
     // tampon , (memoire patagé)
     tampon = (struct case_tampon *)malloc(4 * sizeof(struct case_tampon));
 

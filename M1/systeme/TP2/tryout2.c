@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/msg.h>
-#include <sys/shm.h>
 #include <semaphore.h>
 
 const int Nbfiliere = 3;
@@ -56,10 +55,9 @@ struct reponse
 void creer_structure()
 {
     // file message boite au lettres
-    key_t msgkey = ftok("progfile", 65);
-    msgid = msgget(msgkey, 0666 | IPC_CREAT);
-    key_t shmkey = ftok("progfile", 65);
-    shmid = shmget (shmkey, sizeof (int), 0644 | IPC_CREAT);
+    key_t key = ftok("progfile", 65);
+    msgid = msgget(key, 0666 | IPC_CREAT);
+
     // tampon , (memoire patagé)
     tampon = (struct case_tampon *)malloc(4 * sizeof(struct case_tampon));
 
@@ -68,6 +66,8 @@ void creer_structure()
     sem_init(&np, 1, 0);
     sem_init(&mutex, 1, 1);
 }
+shmget
+shmat
 
 void detruire_structure()
 {
@@ -135,17 +135,22 @@ void gerant()
 
         // si fini incrementer fini
         //printf("%d",requete.type_demande);
-/*         if (requete.type_demande == 0)
+         if (requete.type_demande == 0)
             fini++;
         else
         {
             // sinon
+            if (/* condition */)
+            {
+                /* code */
+            }
+            
             // si il y'a de la place envoyer ok
             // sinon envoyer complet
             // si 2emme desistement envoyer exclu
             // envoyer reponse
             msgsnd(msgid, &message, sizeof(message), 0); 
-        } */
+        } 
         fini++;
     } 
     exit(0);

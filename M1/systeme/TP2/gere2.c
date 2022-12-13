@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <sys/msg.h>
 #include <semaphore.h>
+#include <fcntl.h>
 
 const int Nbfiliere = 3;
 const int Nbetud = 10;

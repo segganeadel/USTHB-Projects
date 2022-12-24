@@ -1,0 +1,45 @@
+Tab_Affect : Tableau*0..2*Nbetud-1+ de  
+    Enreg Tetud :….;
+        Trep :….;
+        nom :…;
+        moy :…;
+        filière1, filière2 : …..,
+        Nbdesist :… 
+    Fenr;
+
+Nbfini :=0;
+index :=0;
+Nbdesist; 
+
+Debut 
+    Repeter 
+        P(Nplein); 
+        Prelever (Req); 
+        V(Nvide); 
+        Si (Req.TReq<>Fini) Alors 
+            Si (Req.Tetud=EtudF) Alors //EtudiantF************ 
+                Si (Req.Treq= DInscrit) Alors 
+                    Rep :=faire_InscriptionF1(); // elle mémorise aussi des informations dans la table
+                Sinon 
+                    index := Chercher_fiche(); // Chercher_fiche() retourne l’index de la fiche de l’étudiant  dans la table des affectations 
+                    Tab_affec * index+.Nbdesist := Tab_affec* index+.Nbdesist +1; //inscrire désistement 
+                    Nbdesist := Tab_affec * index+.Nbdesist; 
+                    Si(Nbdesist=1) Alors
+                        Rep :=faire_InscriptionF2();// elle mémorise aussi….. 
+                    Sinon 
+                        Si (Tab_affec * index+.filiere1 == Tab_affec * index+.filiere2) Alors
+                            Rep :=préparer_exclu(); 
+                        Sinon 
+                            Rep :=faire_InscriptionF3();// elle mémorise aussi …. 
+                        Fsi 
+                    Fsi 
+                Fsi 
+            Sinon //EtudiantN************ 
+                Rep :=faire_InscriptionN();// elle mémorise aussi…. 
+            Fsi; 
+            Envoyer (Fmess, Rep) 
+        Sinon
+            Nbfini :=Nbfini+1 
+        Fsi 
+    Jusqu’à (Nbfini=2); 
+Fin.

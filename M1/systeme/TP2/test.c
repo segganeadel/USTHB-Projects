@@ -1,97 +1,74 @@
-#include <stdio.h>          /* printf()                 */
-#include <stdlib.h>         /* exit(), malloc(), free() */
+#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>      /* key_t, sem_t, pid_t      */
+#include <stdio.h>
+#include <string.h>
 #include <sys/wait.h>
-#include <sys/shm.h>        /* shmat(), IPC_RMID        */
-#include <errno.h>          /* errno, ECHILD            */
-#include <semaphore.h>      /* sem_open(), sem_destroy(), sem_wait().. */
-#include <fcntl.h>          /* O_CREAT, O_EXEC          */
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <sys/msg.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+
+#ifdef __linux
+#define MSG_R 0400
+#define MSG_W 0200
+#endif
 
 
-int main (int argc, char **argv){
-    int i;                        /*      loop variables          */
-    key_t shmkey;                 /*      shared memory key       */
-    int shmid;                    /*      shared memory id        */
-    sem_t *sem;                   /*      synch semaphore         *//*shared */
-    pid_t pid;                    /*      fork pid                */
-    int *p;                       /*      shared variable         *//*shared */
-    unsigned int n;               /*      fork count              */
-    unsigned int value;           /*      semaphore value         */
+int msqid;
 
-    /* initialize a shared variable in shared memory */
-    shmkey = ftok ("/dev/null", 5);       /* valid directory name and a number */
-    printf ("shmkey for p = %d\n", shmkey);
-    shmid = shmget (shmkey, sizeof (int), 0644 | IPC_CREAT);
-    if (shmid < 0){                           /* shared memory error check */
-        perror ("shmget\n");
-        exit (1);
+typedef struct
+{
+    long mtype;
+    int type;
+    int filiere;
+} reponse;
+
+void proc1()
+{
+    reponse rep;
+    rep.mtype = 2;
+    rep.filiere= 2;
+    rep.type = 3;
+    msgsnd(msqid, &rep, sizeof(reponse), 0);
+    exit(0);
+}
+
+void proc2()
+{
+    reponse rep;
+
+    msgrcv(msqid, &rep, sizeof(reponse), 2, 0);
+    printf("filiere: %d, type: %d", rep.filiere, rep.type);
+    exit(0);
+}
+
+int main(int argc, char const *argv[])
+{
+    char *path = "systemV.c";
+
+    if ((msqid = msgget(ftok(path, (key_t)10),
+                        IPC_CREAT | IPC_EXCL | MSG_R | MSG_W)) == -1)
+    {
+        perror("Echec de msgget");
+        exit(1);
+    }
+    int id;
+    id = fork();
+    if (id == 0)
+    {
+        proc1();
     }
 
-    p = (int *) shmat (shmid, NULL, 0);   /* attach p to shared memory */
-    *p = 0;
-    printf ("p=%d is allocated in shared memory.\n\n", *p);
-
-    /********************************************************/
-
-    printf ("How many children do you want to fork?\n");
-    printf ("Fork count: ");
-    scanf ("%u", &n);
-
-    printf ("What do you want the semaphore value to be?\n");
-    printf ("Semaphore value: ");
-    scanf ("%u", &value);
-
-    /* initialize semaphores for shared processes */
-    sem = sem_open ("pSem", O_CREAT | O_EXCL, 0644, value); 
-    /* name of semaphore is "pSem", semaphore is reached using this name */
-    sem_unlink ("pSem");      
-    /* unlink prevents the semaphore existing forever */
-    /* if a crash occurs during the execution         */
-    printf ("semaphores initialized.\n\n");
-
-
-    /* fork child processes */
-    for (i = 0; i < n; i++){
-        pid = fork ();
-        if (pid < 0)              /* check for error      */
-            printf ("Fork error.\n");
-        else if (pid == 0)
-            break;                  /* child processes */
+    id = fork();
+    if (id == 0)
+    {
+        proc2();
     }
 
+    wait(0);
+    wait(0);
 
-    /******************************************************/
-    /******************   PARENT PROCESS   ****************/
-    /******************************************************/
-    if (pid != 0){
-        /* wait for all children to exit */
-        while (pid = waitpid (-1, NULL, 0)){
-            if (errno == ECHILD)
-                break;
-        }
-
-        printf ("\nParent: All children have exited.\n");
-
-        /* shared memory detach */
-        shmdt (p);
-        shmctl (shmid, IPC_RMID, 0);
-
-        /* cleanup semaphores */
-        printf("sem_destroy return value:%d\n",sem_destroy (sem));
-        exit (0);
-    }
-
-    /******************************************************/
-    /******************   CHILD PROCESS   *****************/
-    /******************************************************/
-    else{
-        sem_wait (sem);           /* P operation */
-        printf ("  Child(%d) is in critical section.\n", i);
-        sleep (1);
-        *p += i % 3;              /* increment *p by 0, 1 or 2 based on i */
-        printf ("  Child(%d) new value of *p=%d.\n", i, *p);
-        sem_post (sem);           /* V operation */
-        exit (0);
-    }
+    msgctl(msqid, IPC_RMID, 0);
+    return 0;
 }

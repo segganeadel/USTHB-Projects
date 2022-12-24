@@ -1,0 +1,38 @@
+Debut 
+    Ouvrir (FichF); 
+    Pour i :=1 à Nbetud Faire 
+        Lire (FichF, R); 
+        PréparerF(Req); 
+        P(Nvide); P(mutex); 
+        Déposer (Req); 
+        V(mutex);V(Nplein); 
+        Recevoir (Fmess, Rep); 
+        Mémoriser1(Rep); 
+        Si (Rep.type= Inscrit) et (ReqfFiliere<>Rep.filiere) Alors 
+            Si desist() Alors // desist () : fonction aléatoire qui retourne vrai si le désistement est décidé.
+                Req.Treq=Desist; // envoyer la même requête 
+                P(Nvide);P(mutex); 
+                Déposer (Req); 
+                V(mutex);V(Nplein); 
+                Recevoir (Fmess, Rep); 
+                Mémoriser2(Rep); 
+                Si (Rep.type= Inscrit) et (Req.Filiere<>Rep.Filiere) Alors 
+                    Si desist() Alors  
+                        Req.Treq=Desist; // envoyer la même requête 
+                        P(Nvide);P(mutex); 
+                        Déposer (Req); 
+                        V(mutex);V(Nplein); 
+                        Recevoir (Fmess, Rep) 
+                        Mémoriser3(Rep); 
+                    Fsi 
+                Fsi 
+            Fsi 
+        Fsi; 
+    Fait; 
+    
+    Req.Treq :=Fini; 
+    P(Nvide); P(mutex); 
+    Déposer (Req); 
+    V(mutex); V(Nplein); 
+    Fermer(FichF) 
+Fin

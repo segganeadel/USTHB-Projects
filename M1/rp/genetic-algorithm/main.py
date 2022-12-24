@@ -14,15 +14,15 @@ class Chromosome:
     def setFitness(self):
         # Number of horizontal collisions
         horizontal_collisions = 0
-        for i in range(0, N_QUEENS):
-            for j in range(i+1, N_QUEENS-1):
+        for i in range(0, N_QUEENS-1):
+            for j in range(i+1, N_QUEENS):
                 if self.sequence[i] == self.sequence[j]:
                     horizontal_collisions += 1
         
         # Number of diagonal collisions
         diagonal_collisions = 0
-        for i in range(0, N_QUEENS):
-            for j in range(i+1, N_QUEENS-1):
+        for i in range(0, N_QUEENS-1):
+            for j in range(i+1, N_QUEENS):
                 if abs(i-j) == abs(self.sequence[i]-self.sequence[j]):
                     diagonal_collisions += 1
         # for 8x8 chess: fitness = 28 – (number of collisions)
@@ -113,7 +113,7 @@ N_QUEENS = 8
 POPULATION_SIZE = 100
 MUTATE_FLAG = True
 MUTATE_PROB = 0.1
-MAX_ITER = 500
+MAX_ITER = 1000
 
 
 
@@ -123,7 +123,9 @@ maxFitness = N_QUEENS * (N_QUEENS-1) /2
 population = generateInitialPopulation()
 # Searching for the best solution
 generation = 1
-while (maxFitness != max(population, key=lambda x: x.fitness)) and (generation <= MAX_ITER):
+while  (generation <= MAX_ITER):
+    if (maxFitness == max(population, key=lambda x: x.fitness)):
+        break
     population = GA(population, maxFitness)
     generation += 1
 # Select the best solution from the population

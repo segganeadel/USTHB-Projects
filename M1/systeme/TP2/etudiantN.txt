@@ -1,0 +1,21 @@
+Processus EtudiantN(); 
+Tab_EtudN : Tableau*0..Nbetud-1+ de Enreg Tetud :….;Trep :….; nom :…; moy :…; filière : …..Fenr; RN : Enreg nom :…; moy :…; Fenr; i : entier; 
+Debut 
+    Ouvrir (FichF);
+
+    Pour i :=1 à Nbetud Faire 
+        Lire (FichN, R); 
+        PréparerN(Req); 
+        P(Nplein);P(mutex); 
+        Déposer (Req); 
+        V(mutex);V(Nvide); 
+        Recevoir (Fmess, Rep); 
+        Mémoriser(Rep); 
+    Fait; 
+
+    Req.Treq :=Fini;
+    P(Nvide); P(mutex); 
+    Déposer (Req); 
+    V(mutex); V(Nplein); 
+    Fermer(FichN) 
+Fin. 

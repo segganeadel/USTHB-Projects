@@ -17,7 +17,7 @@ class MancalaBoard:
     
     # mouvements possibles
     # retourne une list des codes ASCII des fosses
-    def possibleMoves(self,player):
+    def possibleMoves(self,player:int):
         Moves = []
         if player == 1:
             for c in MancalaBoard.fosse1:
@@ -34,21 +34,24 @@ class MancalaBoard:
         graines = self.board[position]
         self.board[position] = 0
         while graines > 0:
+
             position = MancalaBoard.nextFosse[position] 
             if (player == 1 and position == '2') or (player == 2 and position == '1'):
                 continue
+
             self.board[position] += 1
             graines -= 1
+            
             if graines == 0:
                 if (position == str(player) == '1') or (position == str(player) == '2'):
                     return player
-                if self.board[position] == 1:
-                    if player == 1 and position in MancalaBoard.fosse1 and self.board[MancalaBoard.opposite[position]] != 0:
+                if self.board[position] == 1 and self.board[MancalaBoard.opposite[position]] != 0:
+                    if player == 1 and position in MancalaBoard.fosse1 :
                         oppositeFosse = MancalaBoard.opposite[position]
                         self.board['1'] += self.board[oppositeFosse]+1
                         self.board[oppositeFosse] = 0
                         self.board[position] = 0
-                    elif player == 2 and position in MancalaBoard.fosse2 and self.board[MancalaBoard.opposite[position]] != 0:
+                    elif player == 2 and position in MancalaBoard.fosse2 :
                         oppositeFosse = MancalaBoard.opposite[position]
                         self.board['2'] += self.board[oppositeFosse]+1
                         self.board[oppositeFosse] = 0 

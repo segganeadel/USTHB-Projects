@@ -56,7 +56,7 @@ def gradient_1(i, x, y, y_pred):
 
 alpha = 0.01
 # Degree 0 means y=b i.e there is only bias
-weight = [0,0,0,0,0,0,0,0,0]
+weight = [0,0,0,0,0,0]
 iterations = 100000
 # -------------------------------------------------------------------
 # Training loop
@@ -74,8 +74,8 @@ for epoch in range(iterations):
 
     l = loss(y_train, y_pred)
     losses.append(l)
-    if(epoch % 10 == 0 or epoch == 99):
-        print("progress:", epoch, "w=", weight, "loss=", np.mean(losses))
+    #if(epoch % 10 == 0 or epoch == 99):
+        #print("progress:", epoch, "w=", weight, "loss=", np.mean(losses))
 
 
 

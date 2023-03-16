@@ -7,11 +7,9 @@ sift = cv.SIFT_create()
 kp, des = sift.detectAndCompute(gray, None)
 print(len(kp))
 print(len(des))
-""" i=1
+
+i=1
 for k in kp:
     print("keypoint" + str(i))
     print(k.pt,k.size,k.angle,k.response)
     i += 1
-
-for d in des:
-    print(d) """

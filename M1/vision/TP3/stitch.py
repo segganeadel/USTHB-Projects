@@ -3,29 +3,23 @@
 import cv2
 import numpy as np
 #original_image_right
-img_r = cv2.imread('image5.jpg')
+img_r = cv2.imread('image2.jpg')
 imgr = cv2.cvtColor(img_r,cv2.COLOR_BGR2GRAY)
 
 #original_image_left
-img_l = cv2.imread('image4.jpg')
+img_l = cv2.imread('original_image_stitched_crop.jpg')
 imgl = cv2.cvtColor(img_l,cv2.COLOR_BGR2GRAY)
 
-img_3 = cv2.imread('image6.jpg')
-imgl = cv2.cvtColor(img_l,cv2.COLOR_BGR2GRAY)
 
 sift = cv2.SIFT_create()
 # find key points
 kpr, desr = sift.detectAndCompute(imgr,None)
 kpl, desl = sift.detectAndCompute(imgl,None)
-kp3, des3 = sift.detectAndCompute(img3,None)
 
 cv2.imshow('original_image_left_keypoints',cv2.drawKeypoints(img_l,kpl,None))
 cv2.waitKey(0)
 
 cv2.imshow('original_image_right_keypoints',cv2.drawKeypoints(img_r,kpr,None))
-cv2.waitKey(0)
-
-cv2.imshow('original_image_right_keypoints',cv2.drawKeypoints(img_3,kp3,None))
 cv2.waitKey(0)
 
 match = cv2.BFMatcher()

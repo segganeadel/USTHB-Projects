@@ -22,10 +22,10 @@ sigma2 = sigma**2 + sigma**2
 
 
 
-blur_img = cv2.GaussianBlur(image, (5,5), sigma , borderType = cv2.BORDER_DEFAULT)
-blur_img = cv2.GaussianBlur(blur_img, (5,5), sigma , borderType = cv2.BORDER_DEFAULT)
+blur_img = cv2.GaussianBlur(image, (105,105), sigma , borderType = cv2.BORDER_DEFAULT)
+blur_img = cv2.GaussianBlur(blur_img, (105,105), sigma , borderType = cv2.BORDER_DEFAULT)
 
-blur_img2 = cv2.GaussianBlur(image, (5,5),sigma2 , borderType = cv2.BORDER_DEFAULT)
+blur_img2 = cv2.GaussianBlur(image, (105,105),sigma2 , borderType = cv2.BORDER_DEFAULT)
 
 
     # show the image on the newly created image window

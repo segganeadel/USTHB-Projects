@@ -1,10 +1,9 @@
 import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
-imgL = cv.imread('img1.jpg',0)
-imgR = cv.imread('img2.jpg',0)
-stereo = cv.StereoBM_create(numDisparities=32,
-                             blockSize=15)
+imgL = cv.imread('./30/img1.jpg',0)
+imgR = cv.imread('./30/img2.jpg',0)
+stereo = cv.StereoBM_create(numDisparities=32,blockSize=15)
 #Parameters
 #numDisparities  the disparity search range. 
 #For each pixel algorithm will find the best disparity from 0 (default minimum 

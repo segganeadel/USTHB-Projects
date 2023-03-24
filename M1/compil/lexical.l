@@ -11,7 +11,7 @@
 	extern col;
 %}
 
-
+git config --global user.email "segganeadel@gmail.com"
 ltr [a-zA-Z]
 ltrmin [a-z]
 ltrmaj [A-Z]

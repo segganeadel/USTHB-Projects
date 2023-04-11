@@ -24,7 +24,7 @@ prev_img_shape = None
 
 nx = 7
 #Enter the number of inside corners in y
-ny = 9
+ny = 9  
 # Extracting path of individual image stored in a given directory
 images = glob.glob('./images/*.jpg')
 for fname in images:

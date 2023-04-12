@@ -1,0 +1,11 @@
+import numpy as Np
+import matplotlib.pyplot as Plt
+Echec = Np.zeros([200, 200], dtype = Np.uint8)
+for X in range(200):
+    for Y in range(200):
+        if (X % 50) // 25 == (Y % 50) // 25:
+            echiquier_array[X, Y] = 0
+        else:
+            echiquier_array[X, Y] = 255
+plt.imshow(echiquier_array, cmap='Greys_r')
+plt.show()

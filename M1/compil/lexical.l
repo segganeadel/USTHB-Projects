@@ -1,127 +1,124 @@
-%option yylineno
 %{
+  #define YY_USER_INIT { BEGIN(indent_mode);}
 
-	#include<stdio.h>
-	#include<stdlib.h>
-	#include<string.h>
-	#include "myTS.h"
-	#include "syntaxique.tab.h"
-	extern YYSTYPE yylval;
-	extern yylineo;
-	extern col;
+  #include "synt.tab.c"
+  #include<stdio.h>
+  #include<stdlib.h>
+  #include<string.h>
+  extern YYSTYPE yylval;
+  int nb_ligne = 1;
+  int col = 1;
+  int current_line_indent = 0;   /* indentation of the current line */
+  int indent_level = 0;          /* indentation level passed to the parser */
 %}
 
+%x indent_mode 
+lettreM [A-Z]
+lettre [a-zA-Z]
+chiffre [0-9]
+indentation "    "
+commentaire ("#"(.)*)
+IDF {lettreM}({lettre}|{chiffre})*
+VAL_CHAR      \'[^']\'   
+VAL_INT  ({chiffre}+|"\("[+-]{chiffre}+"\)")
+VAL_FLOAT	{chiffre}+"."{chiffre}+
+VAL_BOOL ("true"|"false")
+Val_Taille ("["{chiffre}+"]")
+Borne {chiffre}+
 
-ltr [a-zA-Z]
-ltrmin [a-z]
-ltrmaj [A-Z]
-chfr [0-9]
-idf {ltrmaj}({ltrmin}|{chfr}|_)*
-const_int ([1-9][0-9]*)|0
-const_float ([1-9][0-9]*\.[0-9]+)|(0\.[0-9]+)
-const_int_s \(([+-]?([1-9][0-9]*|0))\)
-const_float_s \(([+-]?([1-9][0-9]*\.[0-9]+)|(0\.[0-9]+))\)
-const_ch \'{ltr}\'
-const_str \"[^\"]+\"
-comm \#[^#]+\!
-saut [\n]
+
 
 %%
 
+<indent_mode>{indentation} { current_line_indent++; col += yyleng; }
+<indent_mode>"\n" { nb_ligne++; col = 1; current_line_indent = 0; }
+<indent_mode><<EOF>> {
+                        if (current_line_indent < indent_level) {
+                           //printf("send dedent from eof \n\n");
+                            indent_level--;
+                            return DEDENT;
+                        }
+                        BEGIN(INITIAL);
+                    }
+<indent_mode>. {
+                    //printf("Line : %d, Indentation end, current indentation level: %d, previous indentation level: %d \n", line_number, current_line_indent, indent_level);
+                    unput(*yytext);  //      first line 
+                    // seconde line 
+                    if (current_line_indent > indent_level) {
+                        indent_level++;
+                        return INDENT;
+                    }
+                    if (current_line_indent < indent_level) {
+                        indent_level--;
+                        return DEDENT;
+                    }
+                    BEGIN(INITIAL);
+                }
 
-{comm}
-"IDENTIFICATION DIVISION" {rechercher (yytext,"mc_idendiv"," ",0, 1); col += strlen(yytext);return mc_idendiv;}
-"PROGRAM-ID" {rechercher (yytext,"mc_progid"," ",0, 1); col += strlen(yytext);return mc_progid;}
-"DATA DIVISION" {rechercher (yytext,"mc_datadiv"," ",0, 1); col += strlen(yytext); return mc_datadiv; return mc_datadiv;}
-"WORKING-STORAGE SECTION" {rechercher (yytext,"mc_stodiv"," ",0, 1); col += strlen(yytext); return mc_stodiv;}
-"PROCEDURE DIVISION" {rechercher (yytext,"mc_prodiv"," ",0, 1); col += strlen(yytext); return mc_prodiv;}
-"STOP RUN" {rechercher (yytext,"mc_stop"," ",0, 1); col += strlen(yytext); return mc_stop;}
-TYPE {rechercher (yytext,"mc_type"," ",0, 1); col += strlen(yytext); return mc_type;}
-COMPUTE {rechercher (yytext,"mc_compute"," ",0, 1); col += strlen(yytext); return mc_compute;}
-ACCEPT {rechercher (yytext,"mc_accept"," ",0, 1); col += strlen(yytext); return mc_accept;}
-DISPLAY {rechercher (yytext,"mc_display"," ",0, 1); col += strlen(yytext); return mc_display;}
-READ {rechercher (yytext,"mc_read"," ",0, 1); col += strlen(yytext);return mc_read;}
-LINE {rechercher (yytext,"mc_line"," ",0, 1); col += strlen(yytext);return mc_line;}
-SIZE {rechercher (yytext,"mc_size"," ",0, 1); col += strlen(yytext);return mc_size;}
-IF {rechercher (yytext,"mc_if"," ",0, 1); col += strlen(yytext);return mc_if;}
-ELSE {rechercher (yytext,"mc_else"," ",0, 1); col += strlen(yytext);return mc_else;}
-MOVE {rechercher (yytext,"mc_move"," ",0, 1); col += strlen(yytext);return mc_move;}
-TO {rechercher (yytext,"mc_to"," ",0, 1); col += strlen(yytext);return mc_to;}
-END {rechercher (yytext,"mc_end"," ",0, 1); col += strlen(yytext);return mc_end;}
-INTEGER {rechercher (yytext,"mc_int"," ",0, 1); col += strlen(yytext);yylval.str=strdup(yytext);return mc_int;}
-FLOAT {rechercher (yytext,"mc_float"," ",0, 1); col += strlen(yytext);yylval.str=strdup(yytext);return mc_float;}
-CHAR {rechercher (yytext,"mc_char"," ",0, 1); col += strlen(yytext);yylval.str=strdup(yytext);return mc_char;}
-STRING {rechercher (yytext,"mc_string"," ",0, 1); col += strlen(yytext);yylval.str=strdup(yytext);return mc_str;}
-CONST {rechercher (yytext,"mc_const"," ",0, 1); col += strlen(yytext);return mc_const;}
-NOT {rechercher (yytext,"mc_not"," ",0, 1); col += strlen(yytext);return mc_not;}
-OR {rechercher (yytext,"mc_or"," ",0, 1); col += strlen(yytext);return mc_or;}
-AND {rechercher (yytext,"mc_and"," ",0, 1); col += strlen(yytext);return mc_and;}
-G {rechercher (yytext,"mc_sup"," ",0, 1); col += strlen(yytext);return mc_sup;}
-GE {rechercher (yytext,"mc_supega"," ",0, 1); col += strlen(yytext);return mc_supega;}
-EQ {rechercher (yytext,"mc_ega"," ",0, 1); col += strlen(yytext);return mc_ega;}
-DI {rechercher (yytext,"mc_diff"," ",0, 1); col += strlen(yytext);return mc_diff;}
-LE {rechercher (yytext,"mc_infega"," ",0, 1); col += strlen(yytext);return mc_infega;}
-L {rechercher (yytext,"mc_inf"," ",0, 1); col += strlen(yytext);return mc_inf;}
-"+" {rechercher (yytext,"sep_plus"," ",0, 2); col += strlen(yytext);yylval.car=yytext[1];return sep_plus;}
-"-" {rechercher (yytext,"sep_moins"," ",0, 2); col += strlen(yytext);yylval.car=yytext[1];return sep_moins;}
-"*" {rechercher (yytext,"sep_etoile"," ",0, 2); col += strlen(yytext);yylval.car=yytext[1];return sep_etoile;}
-"/" {rechercher (yytext,"sep_slash"," ",0, 2); col += strlen(yytext);yylval.car=yytext[1];return sep_slash;}
-"=" {rechercher (yytext,"sep_ega"," ",0, 2); col += strlen(yytext);return sep_ega;}
-"(" {rechercher (yytext,"sep_parouv"," ",0, 2); col += strlen(yytext);return sep_parouv;}
-")" {rechercher (yytext,"sep_parferm"," ",0, 2); col += strlen(yytext);return sep_parferm;}
-"." {rechercher (yytext,"sep_point"," ",0, 2); col += strlen(yytext);return sep_point;}
-":" {rechercher (yytext,"sep_dpoint"," ",0, 2); col += strlen(yytext);return sep_dpoint;}
-";" {rechercher (yytext,"sep_pvg"," ",0, 2); col += strlen(yytext);return sep_pvg;}
-"@" {rechercher (yytext,"sep_arob"," ",0, 2); col += strlen(yytext);return sep_arob;}
-"$" {rechercher (yytext,"sep_dollar"," ",0, 2); col += strlen(yytext);return sep_dollar;}
-"%" {rechercher (yytext,"sep_pourc"," ",0, 2); col += strlen(yytext);return sep_pourc;}
-"#" {rechercher (yytext,"sep_dieze"," ",0, 2); col += strlen(yytext);return sep_dieze;}
-"!" {rechercher (yytext,"sep_exclam"," ",0, 2); col += strlen(yytext);return sep_exclam;}
-"&" {rechercher (yytext,"sep_and"," ",0, 2); col += strlen(yytext);return sep_and;}
-"," {rechercher (yytext,"sep_virg"," ",0, 2); col += strlen(yytext);return sep_virg;}
-"'" {rechercher (yytext,"sep_gill"," ",0, 2); col += strlen(yytext);return sep_gill;}
-"{" {rechercher (yytext,"sep_acco"," ",0, 2); col= col+ strlen (yytext);return sep_acco;}
-"}" {rechercher (yytext,"sep_accf"," ",0, 2); col= col+ strlen (yytext);return sep_accf;}
-"[" {rechercher (yytext,"sep_crov"," ",0, 2); col= col+ strlen (yytext);return sep_crov;}
-"]" {rechercher (yytext,"sep_crof"," ",0, 2); col= col+ strlen (yytext);return sep_crof;}
-"|" {rechercher (yytext,"sep_barre"," ",0, 2); col= col+ strlen (yytext);return sep_barre;}
-" " {col += strlen(yytext);}
-\t {col += strlen(yytext);}
+" "                { col += yyleng;}
+int       {printf("mot cle 'integer' reconnue \n"); yylval.str = strdup(yytext); col = col+strlen(yytext); return mc_int;}
+float     {printf("mot cle 'float' reconnue \n"); yylval.str = strdup(yytext); col = col+strlen(yytext); return mc_float;}
+char      {printf("mot cle 'char' reconnue \n");  yylval.str = strdup(yytext); col = col+strlen(yytext); return mc_char;}
+bool	     {printf("mot cle 'bool' reconnue \n");  yylval.str = strdup(yytext);col = col+strlen(yytext); return mc_bool;}
+"+"       {printf("addition '+' reconnue : %s \n",yytext);  yylval.str = strdup(yytext);col = col + strlen(yytext); return mc_addition;}
+"-"       {printf("Subtraction '-' reconnue : %s \n",yytext); yylval.str = strdup(yytext);col = col + strlen(yytext); return mc_moins;}
+"/"       {printf("division '/' reconnue : %s \n",yytext); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_division;}
+"*"       {printf("multi '*' reconnue : %s \n",yytext); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_multiplication;}
+"and"     {printf("mot cle 'and' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_and;}
+"or"      {printf("mot cle 'or' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_or;}
+"not"     {printf("mot cle 'not' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_not;}
+">"       {printf("mot cle '>' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_Sup;} 
+"<"       {printf("mot cle '<' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_Inf;}
+">="      {printf("mot cle '>=' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_SupE;} 
+"<="      {printf("mot cle '<=' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_InfE;}
+"=="      {printf("mot cle '==' reconnu \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_Egal;}
+"!="      {printf("mot cle '!=' \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_Diff;}
+")"       {printf("parenthese ')' reconnue \n"); yylval.str = strdup(yytext); col = col + strlen(yytext); return mc_parenthese_close;}
+"("       {printf("parenthese '(' reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_parenthese_open;}
+"["       {printf("parenthese '[' reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_bracket_open;}
+"]"       {printf("parenthese ']' reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_bracket_close;}
+"if"        {printf("mot cle 'if' reconnue \n");  col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_if;}
+"else"      {printf("mot cle 'else' reconnue \n");  col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_else;}
+"while"     {printf("mot cle 'while'  reconnue \n");  col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_while;}
+"for"       {printf("mot cle 'for'  reconnue \n"); col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_for;}
+"in"        {printf("mot cle 'in' reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_in;}
+"range"     {printf("mot cle 'range'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_range;}
+"import"     {printf("mot cle 'import'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_import;}
+"numpy"     {printf("mot cle 'numpy'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_numpy;}
+"matplotlib.pyplot"     {printf("mot cle 'matplotlib.pyplot'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_matplotlibpyplot;}
+"as"     {printf("mot cle 'as'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_as;}
+"zeros"     {printf("mot cle 'zeros'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_zeros;}
+"dtype"     {printf("mot cle 'dtype'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_dtype;}
+"uint8"     {printf("mot cle 'uint8'  reconnue \n");col = col + strlen(yytext); yylval.str = strdup(yytext); return mc_uint8;}
+"="         {printf("affectation '=' reconnue \n"); yylval.str = strdup(yytext); col = col+strlen(yytext); return mc_affectation;}
+":"         {printf("deuxPoint ':' reconnue \n");col = col+strlen(yytext); yylval.str = strdup(yytext); return mc_DPoint;}
+","         {printf("vergule reconnue \n");col = col+strlen(yytext); yylval.str = strdup(yytext); return mc_Vergule;}
+"."         {printf("point reconnue \n");col = col+strlen(yytext); yylval.str = strdup(yytext); return mc_point;}
+{commentaire}   {printf("commentaire reconnu : %s \n",yytext);}
+{IDF}        {if(strlen(yytext)<= 8) {printf("IDF reconnue : %s \n",yytext); yylval.str = strdup(yytext); col = col + strlen(yytext); return idf;}
+                          else {printf("erreur lexicale : IDF trop long : %s \n",yytext);}}
+{VAL_INT}  {if(atoi(yytext) > -32768 || atoi(yytext) < 32768){
+	          printf("Entite Lexical reconnue %s \n" , yytext );
+             col = col + strlen(yytext); yylval.entier=atoi(yytext); return Val_int;
+	        }
+	        else{
+              printf("integer invalide ligne: %d,colonne: %d",nb_ligne,col);
+                }} 
+{VAL_FLOAT} {printf("REEL reconnue : %s \n",yytext); yylval.reel = atoi(yytext); col = col+strlen(yytext); return Val_float;}
+{VAL_CHAR}  {printf("CHAR reconnue : %s \n",yytext); yylval.str = strdup(yytext); col = col+strlen(yytext); return Val_char;}
+{VAL_BOOL}  {printf("BOOLEAN reconnue : %s \n",yytext); yylval.str = strdup(yytext); col = col+strlen(yytext); return Val_bool;}
 
-{saut} {col=1;yylineo++;}
+\n          {nb_ligne++; col = 1; current_line_indent = 0; BEGIN(indent_mode);}
 
-{const_int} {rechercher (yytext,"const_int","INTEGER",atoi(yytext), 0); col += strlen(yytext); 
-			yylval.entier=atoi(yytext); 
-			return const_int;}
-{const_int_s} { 
-				rechercher (yytext,"const_int_s","INTEGER",atoi(yytext), 0);
-				col += strlen(yytext);
-				yylval.entier=atoi(yytext);
-				return const_int_s;}
+<<EOF>> {
+            if (indent_level == 0)
+                return 0;
 
-{const_float} {rechercher (yytext,"const_float","FLOAT",atof(yytext), 0); col += strlen(yytext);yylval.reel=atof(yytext); return const_float;}
-{const_float_s} {
-				int i;
-				char result[20];
-				for(i=0; i<strlen(yytext); i++)
-				{
-					result[i]=yytext[i+1];
-				}
-				result[strlen(result)]='\0';
-				rechercher (result,"const_float_s","FLOAT",atof(yytext), 0); 
-				col += strlen(yytext);
-				yylval.reel=atof(result);
-				return const_float_s;}
+            indent_level--;
+            return DEDENT;
+        }
 
-{const_ch} {rechercher (yytext,"const_ch","CHAR",-32769, 0); col += strlen(yytext);yylval.car=yytext[1];return const_ch;}
-{const_str} {rechercher (yytext,"const_str","STRING",-32769, 0); col += strlen(yytext);yylval.str=strdup(yytext);return const_str;}
+. {printf ("Erreur lexicale : Entite lexicale non reconnue '%s' a la ligne : %d , et la colonne : %d\n",yytext, nb_ligne, col);}
 
-
-{idf}        { 
-               rechercher (yytext,"IDF "," ",-32769, 0); col= col+ strlen (yytext); 
-               if (yyleng<10) { yylval.str=strdup(yytext);return idf;}
-                else printf ("Erreur lexicale: IDF trop long \"%s\" a la ligne %d et a la colonne %d \n", yytext, yylineno, col);
-			 }		 
-. printf("Erreur lexicale a la ligne %d col %d \n",yylineno,col);
 
 %%
